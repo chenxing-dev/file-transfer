@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>从电脑下载文件</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        header {
+            padding: 25px 30px;
+            background: linear-gradient(135deg, #00b894 0%, #00a884 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            color: white;
+            font-size: 24px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .file-list {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .file-header {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr auto;
+            padding: 15px 20px;
+            background: #f8f9ff;
+            font-weight: 600;
+            color: #4a5568;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .file-item {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr auto;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            align-items: center;
+            transition: background 0.2s;
+            gap: 15px;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item:hover {
+            background: #f8f9ff;
+        }
+
+        .file-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .file-icon {
+            width: 24px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .file-size,
+        .file-modified {
+            color: #718096;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .download-btn {
+            background: #4361ee;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(67, 97, 238, 0.2);
+            text-decoration: none;
+        }
+
+        .download-btn:hover {
+            background: #3a56d4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .action-btn:hover {
+            background: #f8f9ff;
+            border-color: #cbd5e0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #a0aec0;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .instructions {
+            background: #f8f9ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .instructions h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            color: #4a5568;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .search-btn {
+            background: #4361ee;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 768px) {
+
+            .file-header,
+            .file-item {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .file-header {
+                display: none;
+            }
+
+            .file-item {
+                grid-template-columns: 1fr auto;
+                grid-template-areas:
+                    "name actions"
+                    "size modified";
+            }
+
+            .file-name {
+                grid-area: name;
+            }
+
+            .file-size {
+                grid-area: size;
+            }
+
+            .file-modified {
+                grid-area: modified;
+            }
+
+            .file-actions {
+                grid-area: actions;
+            }
+
+            .file-size,
+            .file-modified {
+                font-size: 12px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .search-btn {
+                padding: 12px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <a href="/" class="back-btn">← </a>
+            <div class="header-content">
+                <h1>从电脑下载文件</h1>
+                <p class="subtitle">选择文件传输到您的移动设备</p>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="搜索文件名...">
+                <button class="search-btn">搜索</button>
+            </div>
+
+            <div class="file-list">
+                <div class="file-header">
+                    <div>文件名</div>
+                    <div>大小</div>
+                    <div>修改时间</div>
+                    <div>操作</div>
+                </div>
+
+                {% if files %}
+                {% for file in files %}
+                <div class="file-item">
+                    <div class="file-name">
+                        <div class="file-icon">
+                            {% if file.name.endswith('.png') %}🖼️
+                            {% elif file.name.endswith('.txt') %}📝
+                            {% elif file.name.endswith('.pdf') %}📄
+                            {% elif file.name.endswith('.zip') %}📦
+                            {% else %}📁{% endif %}
+                        </div>
+                        <div>{{ file.name }}</div>
+                    </div>
+                    <div class="file-size">{{ (file.size / 1024)|round(1) }} KB</div>
+                    <div class="file-modified">{{ file.modified }}</div>
+                    <div class="file-actions">
+                        <a href="/download-file/{{ file.name }}" class="download-btn">↓ 下载</a>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📁</div>
+                    <p>没有可下载的文件</p>
+                    <p style="margin-top: 15px; font-size: 14px;">
+                        请将文件添加到电脑的"downloads"文件夹
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="instructions">
+                <h2>📋 使用说明</h2>
+                <ul>
+                    <li>点击"下载"按钮将文件保存到您的设备</li>
+                    <li>添加文件到电脑的"downloads"文件夹使其可下载</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 搜索功能
+            const searchInput = document.querySelector('.search-input');
+            const searchBtn = document.querySelector('.search-btn');
+            const fileItems = document.querySelectorAll('.file-item');
+
+            function filterFiles() {
+                const searchTerm = searchInput.value.toLowerCase();
+
+                fileItems.forEach(item => {
+                    const fileName = item.querySelector('.file-name div:nth-child(2)').textContent.toLowerCase();
+                    if (fileName.includes(searchTerm)) {
+                        item.style.display = 'grid';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+
+            searchInput.addEventListener('input', filterFiles);
+            searchBtn.addEventListener('click', filterFiles);
+
+            // 添加悬停效果
+            const downloadBtns = document.querySelectorAll('.download-btn');
+            downloadBtns.forEach(btn => {
+                btn.addEventListener('mouseenter', function () {
+                    this.innerHTML = '↓ 立即下载';
+                });
+
+                btn.addEventListener('mouseleave', function () {
+                    this.innerHTML = '↓ 下载';
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
