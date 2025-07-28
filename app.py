@@ -66,20 +66,20 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/upload", methods=['GET', "POST"])
-def upload_file():
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
     """文件上传页面"""
     if request.method == 'POST':
-        if "file" not in request.files:
+        if 'file' not in request.files:
             return {"status": "error", "message": "没有文件部分"}, 400
-
-        files = request.files.getlist("file")
-        if len(files) == 0 or files[0].filename == "":
+        
+        files = request.files.getlist('file')
+        if len(files) == 0 or files[0].filename == '':
             return {"status": "error", "message": "未选择文件"}, 400
-
+        
         results = []
         for file in files:
-            if file and file.filename.lower().endswith(".png"):
+            if file and allowed_file(file.filename):
                 # 生成唯一文件名
                 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
                 filename = f"{timestamp}_{secure_filename(file.filename)}"
@@ -107,7 +107,7 @@ def upload_file():
                     "filename": file.filename,
                     "message": f"不支持的文件类型，支持格式: {', '.join(allowed_exts)}"
                 })
-
+        
         return {"results": results}
     
     # GET请求返回上传页面
