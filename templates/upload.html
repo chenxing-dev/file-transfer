@@ -1,721 +1,714 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>文件上传</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
 
-        body {
-            background: linear-gradient(135deg, #f0f5ff 0%, #e6eeff 100%);
-            color: #333;
-            line-height: 1.5;
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+      body {
+        background: linear-gradient(135deg, #f0f5ff 0%, #e6eeff 100%);
+        color: #333;
+        line-height: 1.5;
+        min-height: 100vh;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
 
+      .container {
+        width: 100%;
+        max-width: 900px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 90vh;
+        max-height: 700px;
+      }
+
+      header {
+        padding: 20px;
+        background: linear-gradient(135deg, #4361ee 0%, #3a56d4 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .back-btn {
+        color: white;
+        font-size: 20px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .header-content {
+        flex: 1;
+      }
+
+      h1 {
+        font-size: 22px;
+        font-weight: 600;
+      }
+
+      .subtitle {
+        opacity: 0.9;
+        font-size: 14px;
+        margin-top: 4px;
+      }
+
+      .main-content {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .upload-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        overflow: hidden;
+      }
+
+      .preview-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        border-left: 1px solid #eaeaea;
+        padding: 20px;
+        overflow: hidden;
+      }
+
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 18px;
+        margin-bottom: 15px;
+        color: #2d3748;
+      }
+
+      .upload-area {
+        border: 2px dashed #c2d6ff;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        background: #f8fbff;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .upload-area.drag-over {
+        border-color: #4361ee;
+        background: #edf3ff;
+        box-shadow: 0 0 15px rgba(67, 97, 238, 0.1);
+      }
+
+      .upload-icon {
+        font-size: 40px;
+        color: #4361ee;
+        margin-bottom: 15px;
+      }
+
+      .upload-text h2 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #2d3748;
+      }
+
+      .upload-text p {
+        color: #4a5568;
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+
+      .browse-btn {
+        display: inline-block;
+        background: #4361ee;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 3px 10px rgba(67, 97, 238, 0.2);
+      }
+
+      .browse-btn:hover {
+        background: #3a56d4;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+      }
+
+      #fileInput {
+        display: none;
+      }
+
+      .preview-container {
+        flex: 1;
+        overflow-y: auto;
+        border: 1px solid #eaeaea;
+        border-radius: 10px;
+        padding: 15px;
+        background: #fafcff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .preview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 15px;
+        width: 100%;
+      }
+
+      .preview-item {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+        transition: transform 0.3s ease;
+        height: 160px;
+      }
+
+      .preview-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      }
+
+      .preview-content {
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f5f8ff;
+      }
+
+      .preview-image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      }
+
+      .preview-info {
+        padding: 10px;
+      }
+
+      .file-name {
+        font-size: 12px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 4px;
+      }
+
+      .file-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: #718096;
+      }
+
+      .action-section {
+        padding: 15px 20px;
+        background: #f8f9ff;
+        border-top: 1px solid #eaeaea;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .file-count {
+        font-size: 14px;
+        color: #4a5568;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      #uploadBtn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 30px;
+        background: linear-gradient(to right, #4361ee, #3a56d4);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.25);
+      }
+
+      #uploadBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(67, 97, 238, 0.35);
+      }
+
+      #uploadBtn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      #message {
+        margin-top: 10px;
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 14px;
+        display: none;
+      }
+
+      .message-success {
+        background: rgba(76, 201, 240, 0.15);
+        color: #0d6efd;
+        border: 1px solid rgba(76, 201, 240, 0.2);
+        display: block;
+      }
+
+      .message-error {
+        background: rgba(247, 37, 133, 0.15);
+        color: #dc3545;
+        border: 1px solid rgba(247, 37, 133, 0.2);
+        display: block;
+      }
+
+      .message-info {
+        background: rgba(255, 193, 7, 0.15);
+        color: #ffa000;
+        border: 1px solid rgba(255, 193, 7, 0.2);
+        display: block;
+      }
+
+      .empty-preview {
+        text-align: center;
+        padding: 30px;
+        color: #a0aec0;
+        font-size: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        grid-column: span 2 / span 2;
+        grid-row: span 2 / span 2;
+      }
+
+      .empty-icon {
+        font-size: 36px;
+        margin-bottom: 10px;
+        opacity: 0.5;
+      }
+
+      .format-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 15px;
+        justify-content: center;
+      }
+
+      .format-tag {
+        background: #edf2ff;
+        color: #4361ee;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      @media (max-width: 768px) {
         .container {
-            width: 100%;
-            max-width: 900px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 90vh;
-            max-height: 700px;
-        }
-
-        header {
-            padding: 20px;
-            background: linear-gradient(135deg, #4361ee 0%, #3a56d4 100%);
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .back-btn {
-            color: white;
-            font-size: 20px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .header-content {
-            flex: 1;
-        }
-
-        h1 {
-            font-size: 22px;
-            font-weight: 600;
-        }
-
-        .subtitle {
-            opacity: 0.9;
-            font-size: 14px;
-            margin-top: 4px;
+          height: auto;
+          max-height: none;
         }
 
         .main-content {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .upload-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            overflow: hidden;
+          flex-direction: column;
         }
 
         .preview-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            border-left: 1px solid #eaeaea;
-            padding: 20px;
-            overflow: hidden;
+          border-left: none;
+          border-top: 1px solid #eaeaea;
         }
 
-        .section-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: #2d3748;
+        header {
+          padding: 15px;
         }
 
-        .upload-area {
-            border: 2px dashed #c2d6ff;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            background: #f8fbff;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .upload-area.drag-over {
-            border-color: #4361ee;
-            background: #edf3ff;
-            box-shadow: 0 0 15px rgba(67, 97, 238, 0.1);
-        }
-
-        .upload-icon {
-            font-size: 40px;
-            color: #4361ee;
-            margin-bottom: 15px;
-        }
-
-        .upload-text h2 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #2d3748;
-        }
-
-        .upload-text p {
-            color: #4a5568;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-
-        .browse-btn {
-            display: inline-block;
-            background: #4361ee;
-            color: white;
-            padding: 10px 25px;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-            box-shadow: 0 3px 10px rgba(67, 97, 238, 0.2);
-        }
-
-        .browse-btn:hover {
-            background: #3a56d4;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
-        }
-
-        #fileInput {
-            display: none;
+        .upload-section,
+        .preview-section {
+          padding: 15px;
         }
 
         .preview-container {
-            flex: 1;
-            overflow-y: auto;
-            border: 1px solid #eaeaea;
-            border-radius: 10px;
-            padding: 15px;
-            background: #fafcff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
+          max-height: 300px;
         }
-
-        .preview-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 15px;
-            width: 100%;
-        }
-
-        .preview-item {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e2e8f0;
-            transition: transform 0.3s ease;
-            height: 160px;
-        }
-
-        .preview-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-        }
-
-        .preview-content {
-            height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f5f8ff;
-        }
-
-        .preview-image {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .preview-info {
-            padding: 10px;
-        }
-
-        .file-name {
-            font-size: 12px;
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 4px;
-        }
-
-        .file-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: #718096;
-        }
-
-        .action-section {
-            padding: 15px 20px;
-            background: #f8f9ff;
-            border-top: 1px solid #eaeaea;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .file-count {
-            font-size: 14px;
-            color: #4a5568;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        #uploadBtn {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 30px;
-            background: linear-gradient(to right, #4361ee, #3a56d4);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.25);
-        }
-
-        #uploadBtn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(67, 97, 238, 0.35);
-        }
-
-        #uploadBtn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        #message {
-            margin-top: 10px;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 14px;
-            display: none;
-        }
-
-        .message-success {
-            background: rgba(76, 201, 240, 0.15);
-            color: #0d6efd;
-            border: 1px solid rgba(76, 201, 240, 0.2);
-            display: block;
-        }
-
-        .message-error {
-            background: rgba(247, 37, 133, 0.15);
-            color: #dc3545;
-            border: 1px solid rgba(247, 37, 133, 0.2);
-            display: block;
-        }
-
-        .message-info {
-            background: rgba(255, 193, 7, 0.15);
-            color: #ffa000;
-            border: 1px solid rgba(255, 193, 7, 0.2);
-            display: block;
-        }
-
-        .empty-preview {
-            text-align: center;
-            padding: 30px;
-            color: #a0aec0;
-            font-size: 14px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            grid-column: span 2 / span 2;
-            grid-row: span 2 / span 2;
-        }
-
-        .empty-icon {
-            font-size: 36px;
-            margin-bottom: 10px;
-            opacity: 0.5;
-        }
-
-        .format-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 15px;
-            justify-content: center;
-        }
-
-        .format-tag {
-            background: #edf2ff;
-            color: #4361ee;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                height: auto;
-                max-height: none;
-            }
-
-            .main-content {
-                flex-direction: column;
-            }
-
-            .preview-section {
-                border-left: none;
-                border-top: 1px solid #eaeaea;
-            }
-
-            header {
-                padding: 15px;
-            }
-
-            .upload-section,
-            .preview-section {
-                padding: 15px;
-            }
-
-            .preview-container {
-                max-height: 300px;
-            }
-        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="container">
-        <header>
-            <a href="/" class="back-btn"><i class="fas fa-arrow-left"></i></a>
-            <div class="header-content">
-                <h1>文件上传</h1>
-                <p class="subtitle">快速传输文件到您的电脑</p>
+      <header>
+        <a href="/" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+        <div class="header-content">
+          <h1>文件上传</h1>
+          <p class="subtitle">快速传输文件到您的电脑</p>
+        </div>
+      </header>
+
+      <div class="main-content">
+        <div class="upload-section">
+          <div class="section-title">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <h2>上传区域</h2>
+          </div>
+
+          <div class="upload-area" id="dropArea">
+            <div class="upload-icon">
+              <i class="fas fa-cloud-upload-alt"></i>
             </div>
-        </header>
-
-        <div class="main-content">
-            <div class="upload-section">
-                <div class="section-title">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <h2>上传区域</h2>
-                </div>
-
-                <div class="upload-area" id="dropArea">
-                    <div class="upload-icon">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                    </div>
-                    <div class="upload-text">
-                        <h2>拖放文件到此处</h2>
-                        <p>或点击下方按钮选择文件</p>
-                    </div>
-                    <div class="browse-btn" id="browseBtn">
-                        <i class="fas fa-folder-open"></i> 选择文件
-                    </div>
-                    <input type="file" id="fileInput" name="file"
-                        accept=".png,.jpg,.jpeg,.gif,.m4a,.mp3,.wav,.flac,.pdf,.txt" multiple>
-
-                    <div class="format-tags">
-                        <span class="format-tag">PNG/JPG</span>
-                        <span class="format-tag">M4A/MP3</span>
-                        <span class="format-tag">PDF/TXT</span>
-                        <span class="format-tag">GIF/WAV</span>
-                    </div>
-                </div>
-
-                <div id="message"></div>
+            <div class="upload-text">
+              <h2>拖放文件到此处</h2>
+              <p>或点击下方按钮选择文件</p>
             </div>
+            <div class="browse-btn" id="browseBtn"><i class="fas fa-folder-open"></i> 选择文件</div>
+            <input type="file" id="fileInput" name="file" accept=".png,.jpg,.jpeg,.gif,.m4a,.mp3,.wav,.flac,.pdf,.txt" multiple />
 
-            <div class="preview-section">
-                <div class="section-title">
-                    <i class="fas fa-eye"></i>
-                    <h2>文件预览</h2>
-                </div>
-
-                <div class="preview-container" id="previewContainer">
-                    <div class="preview-grid" id="previewGrid">
-                        <div class="empty-preview">
-                            <div class="empty-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                            <p>选择文件后将显示预览</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="format-tags">
+              <span class="format-tag">PNG/JPG</span>
+              <span class="format-tag">M4A/MP3</span>
+              <span class="format-tag">PDF/TXT</span>
+              <span class="format-tag">GIF/WAV</span>
             </div>
+          </div>
+
+          <div id="message"></div>
         </div>
 
-        <div class="action-section">
-            <div class="file-count">
-                <i class="fas fa-file-alt"></i>
-                <span id="fileCount">0 个文件</span>
+        <div class="preview-section">
+          <div class="section-title">
+            <i class="fas fa-eye"></i>
+            <h2>文件预览</h2>
+          </div>
+
+          <div class="preview-container" id="previewContainer">
+            <div class="preview-grid" id="previewGrid">
+              <div class="empty-preview">
+                <div class="empty-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <p>选择文件后将显示预览</p>
+              </div>
             </div>
-            <button id="uploadBtn" disabled>
-                <i class="fas fa-upload"></i> 上传文件
-            </button>
+          </div>
         </div>
+      </div>
+
+      <div class="action-section">
+        <div class="file-count">
+          <i class="fas fa-file-alt"></i>
+          <span id="fileCount">0 个文件</span>
+        </div>
+        <button id="uploadBtn" disabled><i class="fas fa-upload"></i> 上传文件</button>
+      </div>
     </div>
 
     <script>
-        // 页面加载完成后执行
-        document.addEventListener('DOMContentLoaded', () => {
-            const dropArea = document.getElementById('dropArea');
-            const fileInput = document.getElementById('fileInput');
-            const browseBtn = document.getElementById('browseBtn');
-            const uploadBtn = document.getElementById('uploadBtn');
-            const previewGrid = document.getElementById('previewGrid');
-            const messageDiv = document.getElementById('message');
-            const fileCount = document.getElementById('fileCount');
+      // 页面加载完成后执行
+      document.addEventListener("DOMContentLoaded", () => {
+        const dropArea = document.getElementById("dropArea");
+        const fileInput = document.getElementById("fileInput");
+        const browseBtn = document.getElementById("browseBtn");
+        const uploadBtn = document.getElementById("uploadBtn");
+        const previewGrid = document.getElementById("previewGrid");
+        const messageDiv = document.getElementById("message");
+        const fileCount = document.getElementById("fileCount");
 
-            let selectedFiles = [];
+        let selectedFiles = [];
 
-            // 点击浏览按钮触发文件选择
-            browseBtn.addEventListener('click', () => {
-                fileInput.click();
-            });
+        // 点击浏览按钮触发文件选择
+        browseBtn.addEventListener("click", () => {
+          fileInput.click();
+        });
 
-            // 文件选择变化
-            fileInput.addEventListener('change', handleFileSelect);
+        // 文件选择变化
+        fileInput.addEventListener("change", handleFileSelect);
 
-            // 拖放功能
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dropArea.addEventListener(eventName, preventDefaults, false);
-                document.body.addEventListener(eventName, preventDefaults, false);
-            });
+        // 拖放功能
+        ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
+          dropArea.addEventListener(eventName, preventDefaults, false);
+          document.body.addEventListener(eventName, preventDefaults, false);
+        });
 
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
+        function preventDefaults(e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+
+        ["dragenter", "dragover"].forEach(eventName => {
+          dropArea.addEventListener(
+            eventName,
+            () => {
+              dropArea.classList.add("drag-over");
+            },
+            false
+          );
+        });
+
+        ["dragleave", "drop"].forEach(eventName => {
+          dropArea.addEventListener(
+            eventName,
+            () => {
+              dropArea.classList.remove("drag-over");
+            },
+            false
+          );
+        });
+
+        dropArea.addEventListener("drop", handleDrop, false);
+
+        function handleDrop(e) {
+          const dt = e.dataTransfer;
+          const files = dt.files;
+          if (files.length) {
+            addFiles(files);
+          }
+        }
+
+        function handleFileSelect() {
+          if (fileInput.files.length > 0) {
+            addFiles(fileInput.files);
+          }
+        }
+
+        function addFiles(files) {
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+
+            // 检查文件类型
+            if (!isFileTypeAllowed(file.name)) {
+              showMessage(`"${file.name}" 是不支持的文件类型`, "error");
+              continue;
             }
 
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropArea.addEventListener(eventName, () => {
-                    dropArea.classList.add('drag-over');
-                }, false);
-            });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropArea.addEventListener(eventName, () => {
-                    dropArea.classList.remove('drag-over');
-                }, false);
-            });
-
-            dropArea.addEventListener('drop', handleDrop, false);
-
-            function handleDrop(e) {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                if (files.length) {
-                    addFiles(files);
-                }
+            // 避免重复添加
+            if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+              selectedFiles.push(file);
             }
+          }
 
-            function handleFileSelect() {
-                if (fileInput.files.length > 0) {
-                    addFiles(fileInput.files);
-                }
-            }
+          updatePreview();
+          updateFileCount();
+          updateUploadButton();
+          showMessage(`已添加 ${files.length} 个文件`, "info");
+        }
 
-            function addFiles(files) {
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
+        function isFileTypeAllowed(filename) {
+          const ext = filename.split(".").pop().toLowerCase();
+          const allowedExts = ["png", "jpg", "jpeg", "gif", "webp", "m4a", "mp3", "wav", "flac", "ogg", "pdf", "txt"];
+          return allowedExts.includes(ext);
+        }
 
-                    // 检查文件类型
-                    if (!isFileTypeAllowed(file.name)) {
-                        showMessage(`"${file.name}" 是不支持的文件类型`, 'error');
-                        continue;
-                    }
+        function updatePreview() {
+          previewGrid.innerHTML = "";
 
-                    // 避免重复添加
-                    if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
-                        selectedFiles.push(file);
-                    }
-                }
-
-                updatePreview();
-                updateFileCount();
-                updateUploadButton();
-                showMessage(`已添加 ${files.length} 个文件`, 'info');
-            }
-
-            function isFileTypeAllowed(filename) {
-                const ext = filename.split('.').pop().toLowerCase();
-                const allowedExts = [
-                    'png', 'jpg', 'jpeg', 'gif', 'webp',
-                    'm4a', 'mp3', 'wav', 'flac', 'ogg',
-                    'pdf', 'txt'
-                ];
-                return allowedExts.includes(ext);
-            }
-
-            function updatePreview() {
-                previewGrid.innerHTML = '';
-
-                if (selectedFiles.length === 0) {
-                    previewGrid.innerHTML = `
+          if (selectedFiles.length === 0) {
+            previewGrid.innerHTML = `
                         <div class="empty-preview">
                             <div class="empty-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                             <p>选择文件后将显示预览</p>
                         </div>
                     `;
-                    return;
-                }
+            return;
+          }
 
-                selectedFiles.forEach((file, index) => {
-                    const fileType = getFileType(file.name);
-                    const previewItem = document.createElement('div');
-                    previewItem.className = 'preview-item';
+          selectedFiles.forEach((file, index) => {
+            const fileType = getFileType(file.name);
+            const previewItem = document.createElement("div");
+            previewItem.className = "preview-item";
 
-                    const previewContent = document.createElement('div');
-                    previewContent.className = 'preview-content';
+            const previewContent = document.createElement("div");
+            previewContent.className = "preview-content";
 
-                    if (fileType === 'image') {
-                        const img = document.createElement('img');
-                        img.className = 'preview-image';
-                        img.dataset.index = index;
-                        previewContent.appendChild(img);
+            if (fileType === "image") {
+              const img = document.createElement("img");
+              img.className = "preview-image";
+              img.dataset.index = index;
+              previewContent.appendChild(img);
 
-                        // 读取图片并显示
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            img.src = e.target.result;
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                    else if (fileType === 'audio') {
-                        const audioContainer = document.createElement('div');
-                        audioContainer.innerHTML = `
+              // 读取图片并显示
+              const reader = new FileReader();
+              reader.onload = function (e) {
+                img.src = e.target.result;
+              };
+              reader.readAsDataURL(file);
+            } else if (fileType === "audio") {
+              const audioContainer = document.createElement("div");
+              audioContainer.innerHTML = `
                             <i class="fas fa-music" style="font-size: 18px; color: #4361ee;"></i>
                             <div style="font-size: 12px; color: #4a5568;">音频文件</div>
                         `;
-                        previewContent.appendChild(audioContainer);
-                    }
-                    else {
-                        const icon = document.createElement('div');
-                        icon.innerHTML = `<i class="fas fa-file" style="font-size: 16px; color: #4361ee;"></i>`;
-                        previewContent.appendChild(icon);
+              previewContent.appendChild(audioContainer);
+            } else {
+              const icon = document.createElement("div");
+              icon.innerHTML = `<i class="fas fa-file" style="font-size: 16px; color: #4361ee;"></i>`;
+              previewContent.appendChild(icon);
 
-                        const typeText = document.createElement('div');
-                        typeText.textContent = `${fileType}文件`;
-                        typeText.style.marginLeft = '4px';
-                        typeText.style.fontSize = '13px';
-                        typeText.style.color = '#4a5568';
-                        previewContent.appendChild(typeText);
-                    }
+              const typeText = document.createElement("div");
+              typeText.textContent = `${fileType}文件`;
+              typeText.style.marginLeft = "4px";
+              typeText.style.fontSize = "13px";
+              typeText.style.color = "#4a5568";
+              previewContent.appendChild(typeText);
+            }
 
-                    const previewInfo = document.createElement('div');
-                    previewInfo.className = 'preview-info';
+            const previewInfo = document.createElement("div");
+            previewInfo.className = "preview-info";
 
-                    const fileName = document.createElement('div');
-                    fileName.className = 'file-name';
-                    fileName.textContent = file.name.length > 20 ?
-                        file.name.substring(0, 17) + '...' : file.name;
-                    previewInfo.appendChild(fileName);
+            const fileName = document.createElement("div");
+            fileName.className = "file-name";
+            fileName.textContent = file.name.length > 20 ? file.name.substring(0, 17) + "..." : file.name;
+            previewInfo.appendChild(fileName);
 
-                    const fileMeta = document.createElement('div');
-                    fileMeta.className = 'file-meta';
-                    fileMeta.innerHTML = `
+            const fileMeta = document.createElement("div");
+            fileMeta.className = "file-meta";
+            fileMeta.innerHTML = `
                         <span>${formatFileSize(file.size)}</span>
                         <span>${fileType}</span>
                     `;
-                    previewInfo.appendChild(fileMeta);
+            previewInfo.appendChild(fileMeta);
 
-                    previewItem.appendChild(previewContent);
-                    previewItem.appendChild(previewInfo);
-                    previewGrid.appendChild(previewItem);
-                });
-            }
+            previewItem.appendChild(previewContent);
+            previewItem.appendChild(previewInfo);
+            previewGrid.appendChild(previewItem);
+          });
+        }
 
-            function getFileType(filename) {
-                const ext = filename.split('.').pop().toLowerCase();
-                if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) return '图片';
-                if (['m4a', 'mp3', 'wav', 'flac', 'ogg'].includes(ext)) return '音频';
-                if (['pdf', 'txt'].includes(ext)) return '文档';
-                return '其他';
-            }
+        function getFileType(filename) {
+          const ext = filename.split(".").pop().toLowerCase();
+          if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext)) return "图片";
+          if (["m4a", "mp3", "wav", "flac", "ogg"].includes(ext)) return "音频";
+          if (["pdf", "txt"].includes(ext)) return "文档";
+          return "其他";
+        }
 
-            function formatFileSize(bytes) {
-                if (bytes < 1024) return bytes + ' B';
-                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-                return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-            }
+        function formatFileSize(bytes) {
+          if (bytes < 1024) return bytes + " B";
+          if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+          return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+        }
 
-            function updateUploadButton() {
-                uploadBtn.disabled = selectedFiles.length === 0;
-            }
+        function updateUploadButton() {
+          uploadBtn.disabled = selectedFiles.length === 0;
+        }
 
-            function updateFileCount() {
-                fileCount.textContent = `${selectedFiles.length} 个文件`;
-            }
+        function updateFileCount() {
+          fileCount.textContent = `${selectedFiles.length} 个文件`;
+        }
 
-            function showMessage(msg, type) {
-                messageDiv.textContent = msg;
-                messageDiv.className = `message-${type}`;
+        function showMessage(msg, type) {
+          messageDiv.textContent = msg;
+          messageDiv.className = `message-${type}`;
 
-                // 3秒后自动消失
-                if (type !== 'error') {
-                    setTimeout(() => {
-                        messageDiv.style.opacity = '0';
-                        setTimeout(() => {
-                            messageDiv.className = '';
-                            messageDiv.style.opacity = '1';
-                        }, 300);
-                    }, 3000);
-                }
-            }
+          // 3秒后自动消失
+          if (type !== "error") {
+            setTimeout(() => {
+              messageDiv.style.opacity = "0";
+              setTimeout(() => {
+                messageDiv.className = "";
+                messageDiv.style.opacity = "1";
+              }, 300);
+            }, 3000);
+          }
+        }
 
-            // 上传文件
-            uploadBtn.addEventListener('click', async () => {
-                if (selectedFiles.length === 0) {
-                    showMessage('请先选择文件', 'error');
-                    return;
-                }
+        // 上传文件
+        uploadBtn.addEventListener("click", async () => {
+          if (selectedFiles.length === 0) {
+            showMessage("请先选择文件", "error");
+            return;
+          }
 
-                try {
-                    showMessage('上传中，请稍候...', 'info');
-                    uploadBtn.disabled = true;
-                    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 上传中...';
+          try {
+            showMessage("上传中，请稍候...", "info");
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 上传中...';
 
-                    const formData = new FormData();
-                    selectedFiles.forEach(file => {
-                        formData.append('file', file);
-                    });
-
-                    const response = await fetch('/upload', {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok) {
-                        let successCount = 0;
-                        let errorCount = 0;
-
-                        result.results.forEach(fileResult => {
-                            if (fileResult.status === 'success') {
-                                successCount++;
-                            } else {
-                                errorCount++;
-                            }
-                        });
-
-                        let message = `成功上传 ${successCount} 个文件`;
-                        if (errorCount > 0) {
-                            message += `, ${errorCount} 个文件失败`;
-                        }
-
-                        showMessage(message, 'success');
-
-                        // 清空已上传文件
-                        selectedFiles = [];
-                        updatePreview();
-                        updateUploadButton();
-                        updateFileCount();
-                    } else {
-                        showMessage(`上传失败: ${result.message || '服务器错误'}`, 'error');
-                    }
-
-                } catch (error) {
-                    showMessage(`网络错误: ${error.message}`, 'error');
-                } finally {
-                    uploadBtn.disabled = selectedFiles.length === 0;
-                    uploadBtn.innerHTML = '<i class="fas fa-upload"></i> 上传文件';
-                }
+            const formData = new FormData();
+            selectedFiles.forEach(file => {
+              formData.append("file", file);
             });
-        });
-    </script>
-</body>
 
+            const response = await fetch("/upload", {
+              method: "POST",
+              body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+              let successCount = 0;
+              let errorCount = 0;
+
+              result.results.forEach(fileResult => {
+                if (fileResult.status === "success") {
+                  successCount++;
+                } else {
+                  errorCount++;
+                }
+              });
+
+              let message = `成功上传 ${successCount} 个文件`;
+              if (errorCount > 0) {
+                message += `, ${errorCount} 个文件失败`;
+              }
+
+              showMessage(message, "success");
+
+              // 清空已上传文件
+              selectedFiles = [];
+              updatePreview();
+              updateUploadButton();
+              updateFileCount();
+            } else {
+              showMessage(`上传失败: ${result.message || "服务器错误"}`, "error");
+            }
+          } catch (error) {
+            showMessage(`网络错误: ${error.message}`, "error");
+          } finally {
+            uploadBtn.disabled = selectedFiles.length === 0;
+            uploadBtn.innerHTML = '<i class="fas fa-upload"></i> 上传文件';
+          }
+        });
+      });
+    </script>
+  </body>
 </html>
