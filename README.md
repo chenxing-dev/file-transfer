@@ -1,8 +1,8 @@
-# 文件传输应用
+# File Transfer Web Application | 文件传输应用
+
+![File Transfer Demo](demo.gif)
 
 这个项目是一个简单的本地文件传输解决方案，允许你通过设备浏览器直接将PNG文件传输到你的电脑上，无需任何第三方服务或云存储。
-
-![应用截图](800x400?text=iPad+File+Transfer+Screenshot)
 
 ## 功能特点
 
