@@ -7,6 +7,8 @@ import socket
 from flask import Flask, request, render_template, send_file
 from werkzeug.utils import secure_filename
 
+from utils.file_validation import allowed_file_type, get_file_category, validate_file_size
+
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"  # 保存文件的目录
 DOWNLOAD_FOLDER = 'downloads'
@@ -14,12 +16,20 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config['DOWNLOAD_FOLDER'] = DOWNLOAD_FOLDER
 PORT = 8080  # 开发端口
 
-# 允许的文件扩展名
-ALLOWED_EXTENSIONS = {
-    'image': ['png', 'jpg', 'jpeg', 'gif', 'webp'],
-    'audio': ['m4a', 'mp3', 'wav', 'flac', 'ogg'],
-    'document': ['pdf', 'txt', 'doc', 'docx', 'xlsx']
-}
+# File size configuration (in bytes)
+app.config.update({
+    'MAX_CONTENT_LENGTH': 100 * 1024 * 1024,  # 100MB total request size
+    'MAX_FILE_SIZE': 50 * 1024 * 1024,        # 50MB per file
+    'MAX_IMAGE_SIZE': 10 * 1024 * 1024,        # 10MB for images
+    'MAX_VIDEO_SIZE': 50 * 1024 * 1024,        # 50MB for videos
+    'MAX_DOCUMENT_SIZE': 5 * 1024 * 1024,      # 5MB for documents
+    'ALLOWED_EXTENSIONS': {
+        'image': ['png', 'jpg', 'jpeg', 'gif', 'webp'],
+        'audio': ['m4a', 'mp3', 'wav', 'flac', 'ogg'],
+        'document': ['pdf', 'txt', 'doc', 'docx', 'xlsx'],
+        'videos': ['mp4', 'mov', 'avi', 'mkv'],
+    }
+})
 
 
 def get_local_ip():
@@ -47,24 +57,6 @@ def prepare_directories():
 prepare_directories()
 
 
-def allowed_file(filename):
-    """检查文件扩展名是否允许"""
-    ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
-    for category, exts in ALLOWED_EXTENSIONS.items():
-        if ext in exts:
-            return True
-    return False
-
-
-def get_file_category(filename):
-    """获取文件类型分类"""
-    ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
-    for category, exts in ALLOWED_EXTENSIONS.items():
-        if ext in exts:
-            return category
-    return 'other'
-
-
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -83,39 +75,52 @@ def upload():
 
         results = []
         for file in files:
-            if file and allowed_file(file.filename):
-                # 生成唯一文件名
-                timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-                filename = f"{timestamp}_{secure_filename(file.filename)}"
-                save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                try:
-                    file.save(save_path)
+            # Skip empty files
+            if file and file.filename != '':
+                # Validate file size
+                size_valid, size_error = validate_file_size(file)
+                if size_valid:
+                    # Validate file type
+                    if allowed_file_type(filename=file.filename):
+                        # 生成唯一文件名
+                        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+                        filename = f"{timestamp}_{secure_filename(file.filename)}"
+                        save_path = os.path.join(
+                            app.config['UPLOAD_FOLDER'], filename)
+                        try:
+                            file.save(save_path)
+                            results.append({
+                                "status": "success",
+                                "filename": filename,
+                                "size": os.path.getsize(save_path),
+                                "type": get_file_category(file.filename)
+                            })
+                        except OSError as e:
+                            results.append({
+                                "status": "error",
+                                "filename": file.filename,
+                                "message": f"保存文件失败: {str(e)}"
+                            })
+                    else:
+                        allowed_exts = []
+                        for exts in app.config['ALLOWED_EXTENSIONS'].values():
+                            allowed_exts.extend(exts)
+                        results.append({
+                            "status": "error",
+                            "filename": file.filename,
+                            "message": f"不支持的文件类型，支持格式: {', '.join(allowed_exts)}"
+                        })
+                else:
                     results.append({
-                        "status": "success",
-                        "filename": filename,
-                        "size": os.path.getsize(save_path),
-                        "type": get_file_category(file.filename)
+                        'filename': file.filename,
+                        'status': 'error',
+                        'message': size_error
                     })
-                except OSError as e:
-                    results.append({
-                        "status": "error",
-                        "filename": file.filename,
-                        "message": f"保存文件失败: {str(e)}"
-                    })
-            else:
-                allowed_exts = []
-                for exts in ALLOWED_EXTENSIONS.values():
-                    allowed_exts.extend(exts)
-                results.append({
-                    "status": "error",
-                    "filename": file.filename,
-                    "message": f"不支持的文件类型，支持格式: {', '.join(allowed_exts)}"
-                })
-
+        print(f"上传结果: {results}")
         return {"results": results}
 
     # GET请求返回上传页面
-    return render_template('upload.html', allowed_extensions=ALLOWED_EXTENSIONS)
+    return render_template('upload.html', allowed_extensions=app.config['ALLOWED_EXTENSIONS'])
 
 
 @app.route('/download')
