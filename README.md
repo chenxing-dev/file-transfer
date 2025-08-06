@@ -1,79 +1,114 @@
-# File Transfer Web Application | 文件传输应用
+# File Transfer Web Application
 
 ![File Transfer Demo](demo.gif)
 
-这个项目是一个简单的本地文件传输解决方案，允许你通过设备浏览器直接将PNG文件传输到你的电脑上，无需任何第三方服务或云存储。
+A web application for file transfers between devices on the same network. Built with Flask and Tailwind CSS. 
 
-## 功能特点
+这个项目是一个简单的本地文件传输解决方案，无需任何第三方服务或云存储。
 
-- 🌐 通过本地网络直接传输
-- ⚡ 简单易用的界面
-- 🔒 本地网络传输，数据不经过第三方
+## Features
 
-## 快速开始
+- **Bidirectional file transfer**: Upload from any device to server, download from server to any device
+- **Responsive design**: Works on mobile, tablet, and desktop
+- **Security features**:
+  - File type whitelisting
+  - Secure filename handling
+  - Unique filenames to prevent conflicts
+- **Modern UI**:
+  - Toast notifications
+  - File type icons
+  - Drag-and-drop uploads
+  - Animated interactions
+- **Search functionality**: Quickly find files by name
 
-### 前提条件
-- Python 3.6+
-- Pip 包管理器
+## Technology Stack
 
-### 安装步骤
+- **Backend**: Python, Flask
+- **Frontend**: HTML, Tailwind CSS, JavaScript
+- **Build Tools**: Tailwind CLI
+- **Icons**: Font Awesome
 
-1. 克隆仓库：
+## Installation
+
+### Prerequisites
+- Python 3.7+
+- Node.js & npm (for Tailwind CSS)
+
+### Setup Instructions
+
+1. Clone the repository:
 ```bash
 git clone https://github.com/chenxing-dev/file-transfer.git
 cd file-transfer
 ```
 
-2. 安装依赖：
+2. Create a virtual environment and install dependencies:
 ```bash
+python -m venv venv
+source venv/bin/activate  # Linux/MacOS
+venv\Scripts\activate     # Windows
 pip install -r requirements.txt
 ```
 
-3. 启动服务器：
+3. Install Tailwind CSS:
+```bash
+npm install -D tailwindcss @tailwindcss/cli
+```
+
+4. (Optional) Start the Tailwind CLI build process:
+```bash
+npx @tailwindcss/cli -i ./templates/src/input.css -o ./static/output.css --watch
+```
+
+5. Start the application:
 ```bash
 python app.py
 ```
 
-### 使用方法
+6. Access the application at: `http://127.0.0.1:8080`
 
-1. 确保设备和电脑在**同一Wi-Fi网络**下
-2. 在浏览器中访问：
-```
-http://<你的电脑IP>:8080
-```
-例如：
-```
-http://192.168.1.10:8080
-```
+## Usage
 
-1. 选择要传输的PNG文件并点击上传
-2. 文件将保存在电脑的`uploads/`目录中
+### Uploading Files
+1. Click "开始上传" on the main page
+2. Drag and drop files into the upload area or click to select files
+3. Supported file types: images, documents, audio
 
-### 查找电脑IP地址
-- **Windows**: 命令提示符输入 `ipconfig`
-- **Mac/Linux**: 终端输入 `ip a`
+### Downloading Files
+1. Click "浏览文件" on the main page
+2. Search for files using the search bar
+3. Click the download button next to any file
 
-## 项目结构
+## Project Structure
 
 ```
 file-transfer/
-├── templates/
-│   └── upload.html       # 前端页面
-├── uploads/              # 上传文件存储目录
-├── app.py                # Flask主应用
-├── README.md             # 项目文档
-├── requirements.txt      # 依赖列表
-└── TODO.md               # 项目待办事项
+├── app.py                 # Main Flask application
+├── requirements.txt       # Python dependencies
+├── static/                # Static assets
+│   ├── output.css         # Compiled Tailwind CSS
+│   └── favicon.svg        # Application favicon
+├── templates/             # HTML templates
+│   ├── index.html         # Main page
+│   ├── download.html      # Download page
+│   ├── upload.html        # Upload page
+│   └── src/               # Tailwind source files
+│       └── input.css      # Tailwind input CSS
+├── downloads/             # Files for the download page
+├── uploads/               # Uploaded files storage
+├── README.md              # Project documentation
+└── TODO.md                # Development roadmap
 ```
 
-## 贡献指南
+## Contributing
 
-欢迎提交问题和拉取请求！请确保：
-1. 在提交PR前运行代码检查
-2. 保持代码风格一致
-3. 为新增功能添加测试
+Contributions are welcome! Please follow these steps:
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/your-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin feature/your-feature`)
+5. Open a pull request
 
-## 许可证
+## License
 
-本项目采用 [MIT 许可证](LICENSE)
-
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file 

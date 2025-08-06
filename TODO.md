@@ -1,22 +1,21 @@
-## 核心功能改进
+# File Transfer Application Roadmap
 
-- [x] 增加文件预览功能
-- [x] 实现批量文件上传功能
-- [x] 添加文件类型过滤选项（支持JPG等）
-- [ ] 拖放文件至上传区域
-- [ ] 添加上传进度条显示
-- [ ] ![应用截图](800x400?text=iPad+File+Transfer+Screenshot)
+## Immediate Tasks (v1.0 Release)
+- [x] Implement core file upload functionality
+- [x] Create file download interface
+- [x] Add image preview capability
+- [x] Design responsive UI with Tailwind CSS
+- [x] Implement file search functionality
+- [x] Add toast notification
+- [x] Create file type icons for visual identification
+- [x] Write installation and usage documentation
 
-## 用户体验优化
+## Enhancements (v1.1)
+- [ ] Implement user authentication system
+- [ ] Implement drag-and-drop file organization
 
-- [x] 设计响应式布局，适配手机和桌面
-- [ ] 实现成功/失败动画反馈
+## Performance & Security
+- [ ] Implement file size limits
 
-## 技术增强
-
-- [ ] 添加文件大小限制配置
-- [ ] 添加基础认证保护
-
-## 监控与维护
-
-- [ ] 实现上传日志记录
+## Deployment & Operations
+- [ ] Implement proper logging system
