@@ -1,17 +1,20 @@
 from flask import current_app
-import re
+
+
+def get_all_allowed_extensions():
+    """获取所有允许的文件扩展名"""
+    all_exts = []
+    for category in current_app.config['ALLOWED_EXTENSIONS'].values():
+        all_exts.extend(category)
+    return all_exts
 
 
 def allowed_file_type(filename):
-    """检查文件是否允许"""
-    ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
-    print(f"Checking file type for extension: {ext}")
-    for category, exts in current_app.config['ALLOWED_EXTENSIONS'].items():
-        if ext in exts:
-            print(f"文件类型 {ext} 在允许的列表中: {category}")
-            return True
-    print(f"文件类型 {ext} 不在允许的列表中")
-    return False
+    """检查文件扩展名是否允许"""
+    if '.' not in filename:
+        return False
+    ext = filename.rsplit('.', 1)[1].lower()
+    return ext in get_all_allowed_extensions()
 
 
 def get_file_category(filename):

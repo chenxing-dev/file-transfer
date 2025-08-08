@@ -7,7 +7,7 @@ import socket
 from flask import Flask, request, render_template, send_file
 from werkzeug.utils import secure_filename
 
-from utils.file_validation import allowed_file_type, get_file_category, validate_file_size
+from utils.file_validation import allowed_file_type, get_all_allowed_extensions, get_file_category, validate_file_size
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"  # 保存文件的目录
@@ -25,9 +25,10 @@ app.config.update({
     'MAX_DOCUMENT_SIZE': 5 * 1024 * 1024,      # 5MB for documents
     'ALLOWED_EXTENSIONS': {
         'image': ['png', 'jpg', 'jpeg', 'gif', 'webp'],
-        'audio': ['m4a', 'mp3', 'wav', 'flac', 'ogg'],
+        'audio': ['m4a', 'mp3', 'wav', 'flac'],
         'document': ['pdf', 'txt', 'doc', 'docx', 'xlsx'],
-        'videos': ['mp4', 'mov', 'avi', 'mkv'],
+        'videos': ['mp4'],
+        'archive': ['zip']
     }
 })
 
@@ -120,7 +121,9 @@ def upload():
         return {"results": results}
 
     # GET请求返回上传页面
-    return render_template('upload.html', allowed_extensions=app.config['ALLOWED_EXTENSIONS'])
+    # 获取所有允许的扩展名并传递给模板
+    all_exts = get_all_allowed_extensions()
+    return render_template('upload.html', allowed_extensions=all_exts)
 
 
 @app.route('/download')
