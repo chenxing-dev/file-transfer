@@ -7,7 +7,7 @@ import socket
 from flask import Flask, request, render_template, send_file
 from werkzeug.utils import secure_filename
 
-from utils.file_validation import allowed_file_type, get_all_allowed_extensions, get_file_category, validate_file_size
+from utils.file_validation import allowed_file_type, get_all_allowed_extensions, get_file_category, validate_file_size, get_file_type_mapping
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"  # 保存文件的目录
@@ -23,12 +23,61 @@ app.config.update({
     'MAX_IMAGE_SIZE': 10 * 1024 * 1024,        # 10MB for images
     'MAX_VIDEO_SIZE': 50 * 1024 * 1024,        # 50MB for videos
     'MAX_DOCUMENT_SIZE': 5 * 1024 * 1024,      # 5MB for documents
-    'ALLOWED_EXTENSIONS': {
-        'image': ['png', 'jpg', 'jpeg', 'gif', 'webp'],
-        'audio': ['m4a', 'mp3', 'wav', 'flac'],
-        'document': ['pdf', 'txt', 'doc', 'docx', 'xlsx'],
-        'videos': ['mp4'],
-        'archive': ['zip']
+    'ALLOWED_FILE_TYPE': {
+        'image': {
+            'name': '图片',
+            'extensions': ['png', 'jpg', 'jpeg', 'gif', 'webp'],
+            'icon': 'fas fa-image',
+            'style': 'bg-green-100 text-green-600'
+        },
+        'audio': {
+            'name': '音频',
+            'extensions': ['m4a', 'mp3', 'wav', 'flac',],
+            'icon': 'fas fa-file-audio',
+            'style': 'bg-purple-100 text-purple-600'
+        },
+        'pdf': {
+            'name': '文档',
+            'extensions': ['pdf'],
+            'icon': 'fas fa-file-pdf',
+            'style': 'bg-red-100 text-red-600'
+        },
+        'text': {
+            'name': '文档',
+            'extensions': ['txt'],
+            'icon': 'fas fa-file-alt',
+            'style': 'bg-indigo-100 text-indigo-600'
+        },
+        'word': {
+            'name': '文档',
+            'extensions': ['doc', 'docx'],
+            'icon': 'fas fa-file-word',
+            'style': 'bg-blue-100 text-blue-600'
+        },
+        'excel': {
+            'name': '文档',
+            'extensions': ['xls', 'xlsx'],
+            'icon': 'fas fa-file-excel',
+            'style': 'bg-green-100 text-green-600'
+        },
+        'powerpoint': {
+            'name': '文档',
+            'extensions': ['ppt', 'pptx'],
+            'icon': 'fas fa-file-powerpoint',
+            'style': 'bg-orange-100 text-orange-600'
+        },
+        'video': {
+            'name': '视频',
+            'extensions': ['mp4'],
+            'icon': 'fas fa-file-video',
+            'style': 'bg-pink-100 text-pink-600'
+        },
+        'archive': {
+            'name': '压缩包',
+            'extensions': ['zip', 'rar', '7z'],  
+            'icon': 'fas fa-file-archive',
+            'style': 'bg-yellow-100 text-yellow-600'
+        }
     }
 })
 
@@ -103,13 +152,10 @@ def upload():
                                 "message": f"保存文件失败: {str(e)}"
                             })
                     else:
-                        allowed_exts = []
-                        for exts in app.config['ALLOWED_EXTENSIONS'].values():
-                            allowed_exts.extend(exts)
                         results.append({
                             "status": "error",
                             "filename": file.filename,
-                            "message": f"不支持的文件类型，支持格式: {', '.join(allowed_exts)}"
+                            "message": "不支持的文件类型"
                         })
                 else:
                     results.append({
@@ -121,9 +167,7 @@ def upload():
         return {"results": results}
 
     # GET请求返回上传页面
-    # 获取所有允许的扩展名并传递给模板
-    all_exts = get_all_allowed_extensions()
-    return render_template('upload.html', allowed_extensions=all_exts)
+    return render_template('upload.html', allowed_file_type=app.config['ALLOWED_FILE_TYPE'])
 
 
 @app.route('/download')
@@ -140,7 +184,7 @@ def download():
                 "modified": datetime.fromtimestamp(os.path.getmtime(path)).strftime('%Y-%m-%d %H:%M')
             })
 
-    return render_template('download.html', files=files)
+    return render_template('download.html', files=files, file_type_mapping=get_file_type_mapping())
 
 
 @app.route('/download-file/<filename>')

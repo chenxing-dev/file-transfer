@@ -76,25 +76,17 @@
 
       <!-- 文件列表内容 -->
       <div class="overflow-hidden border-b border-gray-200">
-        {% if files %} {% for file in files %}
+        {% if files %}
+        {% for file in files %}
+
         <div
           class="file-row grid file-grid items-center gap-4 p-4 transition-all hover:bg-neutral-50 border-b border-gray-200 last:border-b-0">
           <div class="flex items-center">
+            {% set ext = file.name.split('.')[-1].lower() %}
+            {% set file_type = file_type_mapping.get(ext, {}) %}
             <div
-              class="file-icon-container w-10 h-10 mr-4 rounded-lg flex items-center justify-center flex-shrink-0 {% if file.name.endswith('.pdf') %}bg-red-100 text-red-600 {% elif file.name.endswith('.png') or file.name.endswith('.jpg') or file.name.endswith('.jpeg') or file.name.endswith('.gif') %}bg-green-100 text-green-600 {% elif file.name.endswith('.zip') or file.name.endswith('.rar') or file.name.endswith('.7z') %}bg-yellow-100 text-yellow-600 {% elif file.name.endswith('.doc') or file.name.endswith('.docx') %}bg-blue-100 text-blue-600 {% elif file.name.endswith('.xls') or file.name.endswith('.xlsx') %}bg-green-100 text-green-600 {% elif file.name.endswith('.ppt') or file.name.endswith('.pptx') %}bg-orange-100 text-orange-600 {% elif file.name.endswith('.txt') %}bg-indigo-100 text-indigo-600 {% elif file.name.endswith('.mp3') or file.name.endswith('.wav') %}bg-purple-100 text-purple-600 {% elif file.name.endswith('.mp4') or file.name.endswith('.mov') or file.name.endswith('.avi') %}bg-pink-100 text-pink-600 {% else %}bg-gray-100 text-gray-600{% endif %}">
-              {% if file.name.endswith('.pdf') %}<i class="fas fa-file-pdf text-xl"></i> {% elif
-              file.name.endswith('.png') or file.name.endswith('.jpg') or file.name.endswith('.jpeg') or
-              file.name.endswith('.gif') %}<i class="fas fa-file-image text-xl"></i> {% elif file.name.endswith('.zip')
-              or file.name.endswith('.rar') or file.name.endswith('.7z') %}<i class="fas fa-file-archive text-xl"></i>
-              {% elif file.name.endswith('.doc') or file.name.endswith('.docx') %}<i
-                class="fas fa-file-word text-xl"></i> {% elif file.name.endswith('.xls') or file.name.endswith('.xlsx')
-              %}<i class="fas fa-file-excel text-xl"></i> {% elif file.name.endswith('.ppt') or
-              file.name.endswith('.pptx') %}<i class="fas fa-file-powerpoint text-xl"></i> {% elif
-              file.name.endswith('.txt') %}<i class="fas fa-file-alt text-xl"></i> {% elif file.name.endswith('.mp3') or
-              file.name.endswith('.wav') %}<i class="fas fa-file-audio text-xl"></i> {% elif file.name.endswith('.mp4')
-              or file.name.endswith('.mov') or
-              file.name.endswith('.avi') %}<i class="fas fa-file-video text-xl"></i> {% else %}<i
-                class="fas fa-file text-xl"></i>{% endif %}
+              class="file-icon-container w-10 h-10 mr-4 rounded-lg flex items-center justify-center flex-shrink-0 {{ file_type.get('style', 'bg-gray-100 text-gray-600') }}">
+              <i class="{{ file_type.get('icon', 'fas fa-file') }} text-xl"></i>
             </div>
             <div class="font-medium text-gray-900 truncate max-w-[200px] sm:max-w-none">{{ file.name }}</div>
           </div>
@@ -108,7 +100,8 @@
             </a>
           </div>
         </div>
-        {% endfor %} {% else %}
+        {% endfor %}
+        {% else %}
         <!-- 空状态 -->
         <div class="text-center py-16">
           <div class="inline-block p-6 bg-gray-100 rounded-full mb-6">

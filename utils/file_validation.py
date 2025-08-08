@@ -4,8 +4,8 @@ from flask import current_app
 def get_all_allowed_extensions():
     """获取所有允许的文件扩展名"""
     all_exts = []
-    for category in current_app.config['ALLOWED_EXTENSIONS'].values():
-        all_exts.extend(category)
+    for category in current_app.config['ALLOWED_FILE_TYPE'].values():
+        all_exts.extend(category.extensions)
     return all_exts
 
 
@@ -61,3 +61,15 @@ def human_readable_size(size_bytes):
         size_bytes /= 1024.0
         i += 1
     return f"{size_bytes:.1f} {units[i]}"
+
+
+# 创建文件扩展名到配置的映射
+def get_file_type_mapping():
+    mapping = {}
+    for category, config in current_app.config['ALLOWED_FILE_TYPE'].items():
+        for ext in config['extensions']:
+            mapping[ext] = {
+                'icon': config['icon'],
+                'style': config['style']
+            }
+    return mapping

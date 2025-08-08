@@ -12,6 +12,3 @@
 
 ## Performance & Security
 - [x] Implement file size limits
-
-## Deployment & Operations
-- [ ] Implement proper logging system
