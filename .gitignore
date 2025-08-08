@@ -2,3 +2,4 @@ venv
 uploads
 downloads
 node_modules
+**/__pycache__
