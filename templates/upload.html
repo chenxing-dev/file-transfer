@@ -5,8 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>文件上传</title>
-  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
-  <link href="./static/output.css" rel="stylesheet" />
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml" />
+  <link href="{{ url_for('static', filename='output.css') }}" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" />
   <style>
     .upload-area.drag-over {
@@ -123,9 +123,12 @@
     </div>
   </div>
 
+  <!-- Embed config JSON in a non-JS script tag to avoid editor parse errors -->
+  <script id="file-type-config" type="application/json">{{ allowed_file_type | tojson | safe }}</script>
+
   <script>
     // 允许的扩展名
-    const fileTypeConfig = {{ allowed_file_type | tojson | safe }};
+    const fileTypeConfig = JSON.parse(document.getElementById('file-type-config').textContent);
     const allowedExts = Object.entries(fileTypeConfig).map(([type, category]) => category.extensions).flat();
 
     // 页面加载完成后执行

@@ -4,7 +4,7 @@
 from datetime import datetime
 import os
 import socket
-from flask import Flask, request, render_template, send_file
+from flask import Flask, request, render_template, send_from_directory, abort
 from werkzeug.utils import secure_filename
 
 from utils.file_validation import (
@@ -28,6 +28,7 @@ app.config.update(
         "MAX_FILE_SIZE": 50 * 1024 * 1024,  # 50MB per file
         "MAX_IMAGE_SIZE": 10 * 1024 * 1024,  # 10MB for images
         "MAX_VIDEO_SIZE": 50 * 1024 * 1024,  # 50MB for videos
+        "MAX_AUDIO_SIZE": 20 * 1024 * 1024,  # 20MB for audio
         "MAX_DOCUMENT_SIZE": 5 * 1024 * 1024,  # 5MB for documents
         "ALLOWED_FILE_TYPE": {
             "image": {
@@ -215,18 +216,15 @@ def download():
     )
 
 
-@app.route("/download-file/<filename>")
+@app.route("/download-file/<path:filename>")
 def download_file(filename):
     """下载指定文件"""
-    path = os.path.join(app.config["DOWNLOAD_FOLDER"], filename)
-    if not os.path.exists(path):
-        return "文件不存在", 404
-
-    # 防止路径遍历攻击
-    if "../" in filename or not os.path.isfile(path):
-        return "无效的文件请求", 400
-
-    return send_file(path, as_attachment=True)
+    # 使用安全方式仅从下载目录发送文件，防止路径遍历
+    safe_name = os.path.basename(filename)
+    try:
+        return send_from_directory(app.config["DOWNLOAD_FOLDER"], safe_name, as_attachment=True)
+    except FileNotFoundError:
+        abort(404)
 
 
 if __name__ == "__main__":

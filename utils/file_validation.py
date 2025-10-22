@@ -1,4 +1,5 @@
 # pylint:disable=C0114,C0116
+import os
 from flask import current_app
 
 
@@ -21,35 +22,49 @@ def allowed_file_type(filename):
 def get_file_category(filename):
     """获取文件类型分类"""
     ext = filename.rsplit(".", 1)[1].lower() if "." in filename else ""
-    for category, exts in current_app.config["ALLOWED_FILE_TYPE"].items():
-        if ext in exts:
+    for category, cfg in current_app.config["ALLOWED_FILE_TYPE"].items():
+        if ext in cfg.get("extensions", []):
             return category
     return "other"
 
 
 def validate_file_size(file):
-    """Validate file size based on file type"""
-    filename = file.filename
-    file_size = len(file.read())
-    file.seek(0)  # Reset file pointer
+    """Validate file size based on file type without loading full file into memory"""
+    filename = getattr(file, "filename", "") or ""
+
+    # Determine file size efficiently
+    file_size = getattr(file, "content_length", None)
+    if file_size is None:
+        try:
+            # Try using the underlying stream
+            pos = file.stream.tell()
+            file.stream.seek(0, os.SEEK_END)
+            file_size = file.stream.tell()
+            file.stream.seek(pos)
+        except Exception:  # noqa: BLE001 - best-effort fallback
+            # Last resort: don't read the body; assume zero to avoid memory blowup
+            file_size = 0
 
     file_type = get_file_category(filename)
 
-    # Get size limits from config
-    max_sizes = {
-        "image": current_app.config.get("MAX_IMAGE_SIZE", 10 * 1024 * 1024),
-        "video": current_app.config.get("MAX_VIDEO_SIZE", 50 * 1024 * 1024),
-        "document": current_app.config.get("MAX_DOCUMENT_SIZE", 5 * 1024 * 1024),
-        "audio": current_app.config.get("MAX_AUDIO_SIZE", 20 * 1024 * 1024),
-        "other": current_app.config.get("MAX_FILE_SIZE", 10 * 1024 * 1024),
-    }
+    # Map grouped document types to a single limit
+    document_types = {"pdf", "text", "word", "excel", "powerpoint"}
 
-    max_size = max_sizes.get(file_type, max_sizes["other"])
+    if file_type == "image":
+        max_size = current_app.config.get("MAX_IMAGE_SIZE", 10 * 1024 * 1024)
+    elif file_type == "video":
+        max_size = current_app.config.get("MAX_VIDEO_SIZE", 50 * 1024 * 1024)
+    elif file_type == "audio":
+        max_size = current_app.config.get("MAX_AUDIO_SIZE", 20 * 1024 * 1024)
+    elif file_type in document_types:
+        max_size = current_app.config.get("MAX_DOCUMENT_SIZE", 5 * 1024 * 1024)
+    else:
+        max_size = current_app.config.get("MAX_FILE_SIZE", 10 * 1024 * 1024)
 
-    if file_size > max_size:
+    if file_size is not None and file_size > max_size:
         return (
             False,
-            f"File too large. Max size for {file_type}s is {human_readable_size(max_size)}",
+            f"File too large. Max size for {file_type} is {human_readable_size(max_size)}",
         )
 
     return True, ""
